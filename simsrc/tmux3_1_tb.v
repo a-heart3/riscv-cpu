@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/13/2025 01:02:41 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: tmux3_1_tb
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,31 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
+module tmux3_1_tb();
+reg  [31:0] src1;
+reg  [31:0] src2;
+reg  [31:0] src3;
+reg  [ 2:0] sel;
+wire [31:0] result;
 
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
-
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
+tmux3_1 tmux3_1(
+    .src1  (src1   ),
+    .src2  (src2   ),
+    .src3  (src3   ),
+    .sel   (sel    ),
+    .result(result )
 );
 
 initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
+    src1 = 32'd1;
+    src2 = 32'd2;
+    src3 = 32'd3;
+    sel  =  3'b000;
     #10;
-    data2 = 32'd2;
+    sel = 3'b001;
     #10;
-    data1 = 31'd3;
+    sel = 3'b010;
+    #10;
+    sel = 3'b100;
 end
 endmodule

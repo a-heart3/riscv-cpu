@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/13/2025 03:27:18 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: pc_tb
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,31 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
+module pc_tb();
 
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
+reg  clk;
+reg  rst;
+reg  [31:0] pc_next;
+wire [31:0] pc_current;
 
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
+pc pc(
+    .pc_next(pc_next),
+    .clk(clk),
+    .rst(rst),
+    .pc_current(pc_current)
 );
 
-initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
-    #10;
-    data2 = 32'd2;
-    #10;
-    data1 = 31'd3;
+initial begin 
+    rst = 1;
+    clk = 0;
+    #100;
+    pc_next = 32'h00000001;
+    #100;
+    rst = 0;
+end
+
+always begin
+    #5;
+    clk = ~clk;
 end
 endmodule

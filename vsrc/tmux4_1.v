@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/13/2025 12:49:03 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: tmux4_1
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
-
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
-
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
+module tmux4_1(
+    input  [31:0] src1,
+    input  [31:0] src2,
+    input  [31:0] src3,
+    input  [31:0] src4,
+    input  [ 3:0] sel,
+    output [31:0] result
 );
 
-initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
-    #10;
-    data2 = 32'd2;
-    #10;
-    data1 = 31'd3;
-end
+assign result = ({32{sel[0]}} & src1)
+              | ({32{sel[1]}} & src2)
+              | ({32{sel[2]}} & src3)
+              | ({32{sel[3]}} & src4);
 endmodule

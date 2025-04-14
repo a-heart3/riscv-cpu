@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/13/2025 09:57:24 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: add
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
+module add(
+    input [31:0] data1,
+    input [31:0] data2,
+    output [31:0] add_result
+    );
 
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
-
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
-);
-
-initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
-    #10;
-    data2 = 32'd2;
-    #10;
-    data1 = 31'd3;
-end
+// logic
+assign add_result = data1 + data2;
 endmodule

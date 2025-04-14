@@ -24,8 +24,8 @@ module comp(
     input  [31:0] data1,
     input  [31:0] data2,
     output        zero,
-    output        cout,
-    output        sign
+    output        slt,
+    output        sltu
 );
 
 // use sub to finish compare
@@ -39,6 +39,9 @@ assign {cout, adder_result} = adder_src1 + adder_src2;
 
 // judges
 assign zero = (adder_result == 0);
-assign sign = (adder_result[31]);
+assign slt  = (data1[31] & ~data2[31])
+            | (~(data1[31] ^ data2[31]) & adder_result[31]);
+
+assign sltu = ~cout;
 
 endmodule

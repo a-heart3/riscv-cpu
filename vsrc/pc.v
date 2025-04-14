@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/13/2025 03:17:11 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: pc
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
-
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
-
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
+module pc(
+    input      [31:0] pc_next,
+    input             clk,
+    input             rst,
+    output reg [31:0] pc_current
 );
 
-initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
-    #10;
-    data2 = 32'd2;
-    #10;
-    data1 = 31'd3;
+always @(posedge clk) begin
+    if (rst) begin
+        pc_current <= 32'h00000000;
+    end
+    else begin
+        pc_current <= pc_next;
+    end
 end
 endmodule

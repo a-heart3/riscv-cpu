@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 04/11/2025 06:49:21 PM
+// Create Date: 04/14/2025 03:03:00 PM
 // Design Name: 
-// Module Name: comp_tb
+// Module Name: dataramtest_tb
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,28 +20,31 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module comp_tb();
+module dataramtest_tb();
+reg clk;
+reg we;
+reg [31:0] aluresult;
+reg [31:0] rdata2;
+wire [31:0] Memdata;
 
-reg [31:0] data1;
-reg [31:0] data2;
-wire       zero;
-wire       slt;
-wire       sltu;
-
-comp comp(
-    .data1(data1 ),
-    .data2(data2 ),
-    .zero (zero  ),
-    .slt  (slt   ),
-    .sltu (sltu  )
+dataramtest dataramtest(
+    .clk(clk),
+    .we(we),
+    .aluresult(aluresult),
+    .rdata2(rdata2),
+    .Memdata(Memdata)
 );
-
+always begin
+   #5; clk = ~clk;
+end
 initial begin
-    data1 = 32'd1;
-    data2 = 32'd1;
+    clk = 0;
+    we  = 0;
+    aluresult = 32'd0;
+    rdata2 = 32'd2323;
     #10;
-    data2 = 32'd2;
+    aluresult = 32'd1;
     #10;
-    data1 = 31'd3;
+    aluresult = 32'd2;
 end
 endmodule
