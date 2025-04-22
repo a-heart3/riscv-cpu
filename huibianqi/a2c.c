@@ -121,7 +121,7 @@ int code_opcode(char* type) {
 
 /* reg number */
 int regnum(char* regname) {
-	printf("test regname is %s\n", regname);
+	// // printf("test regname is %s\n", regname);
 	for(int i=0; i<32; i++) {
 		if(!strcmp(regname, regs[i].name)) {
 			return regs[i].reg;
@@ -153,7 +153,7 @@ void rtype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, in
 	char *arg3 = strtok(NULL, " ");
 	printf("test arg3 is %s\n", arg3);
 	printf("test arg2 is %s\n", arg2);
-	printf("test arg1 is %s\n", arg1);
+	// // printf("test arg1 is %s\n", arg1);
 
 	*instr_rs2 = regnum(arg1);
 	*instr_rs1 = regnum(arg2);
@@ -182,9 +182,9 @@ void itype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, in
 	char *arg2 = strtok(NULL, ",");
 	arg2 = arg2 + 1;
 	char *arg3 = strtok(NULL, " ");
-	printf("test itype arg3 is %s\n", arg3);
-	printf("test itype arg2 is %s\n", arg2);
-	printf("test itype arg1 is %s\n", arg1);
+	// // printf("test itype arg3 is %s\n", arg3);
+	// // printf("test itype arg2 is %s\n", arg2);
+	// // printf("test itype arg1 is %s\n", arg1);
 
 	sscanf(arg1, "%d", &fc7rs2);
 	*instr_func7 = fc7rs2 >> 5;
@@ -211,9 +211,9 @@ void swtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_
 
 	char *imme = strtok(arg2, "(");
 	char *reg_rs2 = strtok(NULL, ")");
-	printf("test sw type arg1 is %s\n", arg1);
-	printf("test sw type imme is %s\n", imme);
-	printf("test sw type reg_rs2 is %s\n", reg_rs2);
+	// // printf("test sw type arg1 is %s\n", arg1);
+	// // printf("test sw type imme is %s\n", imme);
+	// // printf("test sw type reg_rs2 is %s\n", reg_rs2);
 
 	int imme_num = 0;
 	sscanf(imme, "%d", &imme_num);
@@ -251,8 +251,8 @@ void luitype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr
 	char *arg1 = strtok(arguments, ",");
 	char *arg2 = strtok(NULL, " ");
 	unsigned int imme_num = 0;
-	printf("test lui type arg1 is %s\n", arg1);
-	printf("test lui type arg2 is %s\n", arg2);
+	// // printf("test lui type arg1 is %s\n", arg1);
+	// // printf("test lui type arg2 is %s\n", arg2);
 
 	sscanf(arg1, "%x", &imme_num);
 	*instr_func7 = imme_num >> 25;
@@ -262,7 +262,121 @@ void luitype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr
 	*instr_rd = regnum(arg2);
 }
 
-int machinecode(char* str) {
+/* btype decode */
+void btype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int* instr_func3, int* instr_rd, int pos) {
+	int is_btype = 0;
+	for(int i=0; i<nbtype; i++) {
+		if(!strcmp(op, btypes[i].name)) {
+			*instr_func3 = btypes[i].func3;
+			is_btype = 1;
+			break;
+		}
+	}
+
+	if(!is_btype) {
+		assert(0);
+	}
+
+	char *arg1 = strtok(arguments, ",");
+	char *arg2 = strtok(NULL, ",");
+	arg2 = arg2 + 1;									// 去掉arg2多出的空格
+	char *arg3 = strtok(NULL, " ");
+	// // printf("test btype arg3 is %s\n", arg3);
+	// // printf("test btype arg2 is %s\n", arg2);
+	// // printf("test btype arg1 is %s\n", arg1);
+
+	*instr_rs2 = regnum(arg1);
+	*instr_rs1 = regnum(arg2);
+
+	int branch_pos = 0;
+	int is_label = 0;
+	for(int i=0; i<label_pos; i++) {
+		// printf("test loop\n");
+		// printf("label is %s\n", labels[i]->s);
+		// printf("label is %s\n", arg3);
+		if(!strcmp(arg3, labels[i]->s)) {
+				branch_pos = labels[i]->lines;
+				// printf("%s\n", labels[i]->s);
+				is_label = 1;
+				break;
+		}
+	}
+	if(!is_label) {
+		assert(0);
+	}
+
+	/* 这里为了适应vivado当前的让ram形式做了改变，只需要记录offset即可
+	 * 后续修改ram形式需要更改代码
+	 */
+	int offset = branch_pos - (pos + 1);
+	// // printf("the branch address is %d\n", offset);
+	offset = offset & (0x00000fff);
+	*instr_func7 = ((offset >> 5) & 0x40) | ((offset >> 4) & 0x3f);
+	*instr_rd = ((offset & 0xf) << 1) | ((offset >> 10) & 1);
+
+}
+
+/* jalr type decode
+ *	 与 lw 指令的解码过程完全相同
+ */
+void jalrtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int* instr_func3, int* instr_rd) {
+	*instr_func3 = 0;
+
+	char *arg1 = strtok(arguments, ",");
+	char *arg2 = strtok(NULL, " ");
+
+	char *imme = strtok(arg1, "(");
+	char *reg_rs1 = strtok(NULL, ")");
+	// printf("test jalr type arg1 is %s\n", arg1);
+	// printf("test jalr type imme is %s\n", imme);
+	// printf("test jalr type reg_rs1 is %s\n", reg_rs1);
+
+	int imme_num = 0;
+	sscanf(imme, "%d", &imme_num);
+	*instr_func7 = imme_num >> 5;
+	*instr_rs2 = imme_num & 0x1f;
+	*instr_rs1 = regnum(reg_rs1);
+
+	*instr_rd = regnum(arg2);
+
+}
+
+/* jal type decodec */
+void jaltype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int* instr_func3, int* instr_rd, int pos) {
+	char* arg1 = strtok(arguments, ",");
+	char* arg2 = strtok(NULL, " ");
+	// printf("test jal type arg1 is %s\n", arg1);
+	// printf("test jal type arg2 is %s\n", arg2);
+
+	*instr_rd = regnum(arg1);
+
+	int is_label = 0;
+	int branch_pos = 0;
+	for(int i=0; i<label_pos; i++) {
+		// printf("jal test loop\n");
+		// printf("jal label is %s\n", labels[i]->s);
+		// printf("jal label is %s\n", arg2);
+		if(!strcmp(arg2, labels[i]->s)) {
+				branch_pos = labels[i]->lines;
+				// printf("%s\n", labels[i]->s);
+				is_label = 1;
+				break;
+		}
+	}
+	if(!is_label) {
+		assert(0);
+	}
+
+	int address = branch_pos - (pos + 1);
+	// printf("jal address is %d\n", address);
+	address = address & 0xfffff;
+	*instr_func7 = ((address >> 13) & 0x40) | ((address >> 4) & 0x3f);
+	*instr_rs2 = ((address & 0xf) << 1) | ((address >> 10) & 1);
+	*instr_rs1 = (address >> 14) & 0x1f;
+	*instr_func3 = (address >> 11) & 7;
+}
+
+int machinecode(char* str, int pos) {
 	char instr[100];
 	strcpy(instr, str);
 	//char* instr = str;
@@ -283,17 +397,26 @@ int machinecode(char* str) {
 	if(instr_opcode == 0x33) {
 		rtype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
-	if(instr_opcode == 0x13) {
+	else if(instr_opcode == 0x13) {
 		itype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
-	if(instr_opcode == 0x23) {
+	else if(instr_opcode == 0x23) {
 		swtype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
-	if(instr_opcode == 0x03) {
+	else if(instr_opcode == 0x03) {
 		lwtype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
-	if(instr_opcode == 0x37) {
+	else if(instr_opcode == 0x37) {
 		luitype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
+	}
+	else if(instr_opcode == 0x63) {
+		btype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd, pos);
+	}
+	else if(instr_opcode == 0x67) {
+		jalrtype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
+	}
+	else if(instr_opcode == 0x6f) {
+		jaltype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd, pos);
 	}
 	int result = instr_opcode | (instr_rd<<7) | (instr_func3<<12) | (instr_rs1<<15) | (instr_rs2<<20) | (instr_func7<<25);
 	return result;
@@ -304,7 +427,7 @@ int a2c() {
 	int i;
 	for(i=0; i<instr_pos; i++) {
 		char* str = instructions[i];
-		int code = machinecode(str);
+		int code = machinecode(str, i);
 		machinecodes[i] = code;
 	}
 }

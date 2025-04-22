@@ -22,11 +22,11 @@ int main(int argc, char* argv[]) {
 	for(int i=0; i < instr_pos; i++) {
 		printf("%s", instructions[i]);
 	}
-	printf("This is labels:\n");
+	printf("\nThis is labels:\n");
 	for(int j=0; j < label_pos; j++) {
-		printf("pos: %d, label: %s", labels[j]->lines, labels[j]->s);
+		printf("pos: %d, label: %s\n", labels[j]->lines, labels[j]->s);
 	}
-	printf("This is machine code:\n");
+	printf("\nThis is machine code:\n");
 	for(int i=0; i < instr_pos; i++) {
 		printf("opcode: 0x%08x\n", machinecodes[i]);
 	}

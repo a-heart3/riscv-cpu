@@ -43,9 +43,10 @@ void file_handle(char* filepath) {
 
 		if(c == '.') {
 			// 标签处理
+			char* arg = strtok(instruction, ":");
 			label* L = (label *)malloc(sizeof(label));
 		  // printf("test instr_pos = %d\n", instr_pos);
-			L -> lines = instr_pos + 1;      // 标签实际上没有地址，记录的是标签之后第一条指令的地址
+			L -> lines = instr_pos;      // 标签实际上没有地址，记录的是标签之后第一条指令的地址
 			strcpy(L->s, instruction);
 			labels[label_pos] = L;
 			label_pos++;
