@@ -210,7 +210,7 @@ void swtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_
 	char *arg2 = strtok(NULL, " ");
 
 	char *imme = strtok(arg2, "(");
-	char *reg_rs2 = strtok(NULL, ")");
+	char *reg_rs1 = strtok(NULL, ")");
 	// // printf("test sw type arg1 is %s\n", arg1);
 	// // printf("test sw type imme is %s\n", imme);
 	// // printf("test sw type reg_rs2 is %s\n", reg_rs2);
@@ -219,9 +219,9 @@ void swtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_
 	sscanf(imme, "%d", &imme_num);
 	*instr_func7 = imme_num >> 5;
 	*instr_rd = imme_num & 0x1f;
-	*instr_rs2 = regnum(reg_rs2);
+	*instr_rs1 = regnum(reg_rs1);
 
-	*instr_rs1 = regnum(arg1);
+	*instr_rs2 = regnum(arg1);
 }
 
 /* lw type decode */
