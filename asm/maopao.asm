@@ -7,10 +7,16 @@ addi -1, r5, r6
 .L1:
 blt r6, r1, .L2
 .end:
+lw 0(r0), r1
+lw 1(r0), r1
+lw 2(r0), r1
+lw 3(r0), r1
+lw 4(r0), r1
 .L2:
 sub r3, r3, r3
+sub r2, r2, r2
 sub r4, r4, r4
-sub r1, r5, r7
+sub r1, r6, r7
 .L3:
 bge r7, r2, .L6
 lw 0(r2), r8
@@ -24,7 +30,7 @@ addi 0, r8, r4
 addi 0, r9, r8
 addi 0, r4, r9
 sw r8, 0(r2)
-sw r9, 0(r2)
+sw r9, 1(r2)
 addi 1, r0, r3
 jal r19, .L4
 .L6:
