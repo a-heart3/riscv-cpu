@@ -161,8 +161,8 @@ wire [31:0] offset_jalr;
 // ID branch output definition, pc_next has been definition before
 // ID branch assign logic
 assign pc_4 = pc_current + 32'd1;
-assign offset_btype = {{20{instr[31]}}, instr[ 7], instr[30:25], instr[11: 8], 1'b0};
-assign offset_jal   = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+assign offset_btype = {{21{instr[31]}}, instr[ 7], instr[30:25], instr[11: 8]};
+assign offset_jal   = {{13{instr[31]}}, instr[19:12], instr[20], instr[30:21]};
 assign offset_jalr  = ({{20{instr[31]}}, instr[31:20]} + rdata1) & 32'hfffffffe;   // last bit is 0
 assign pc_next1 = pc_4;
 add add2(.data1(pc_4), .data2(offset_btype), .add_result(pc_next2));
