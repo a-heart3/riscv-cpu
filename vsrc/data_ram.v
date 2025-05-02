@@ -52,17 +52,21 @@ wire we3;
 
 wire [1:0] cs;
 
+wire [31:0] wdata_out;
+
 assign cs = address[1:0];
 
-// mode, cs, use for analyse we signal
+// mode, cs, use for analyse we signal and wdata
 ram_we ram_we(
-    .mode(mode),
-    .cs  (cs  ),
-    .we  (we  ),
-    .we0 (we0 ),
-    .we1 (we1 ),
-    .we2 (we2 ),
-    .we3 (we3 )
+    .mode    (mode      ),
+    .cs      (cs        ),
+    .we      (we        ),
+    .wdata_in(wdata     ),
+    .we0     (we0       ),
+    .we1     (we1       ),
+    .we2     (we2       ),
+    .we3     (we3       ),
+    .wdata   (wdata_out )
 );
 
 // address define, need high 30 bits
@@ -81,10 +85,10 @@ wire [7:0] wdata3;
 
 // assign
 assign address_ram = address[31:2];
-assign wdata0 = wdata[ 7: 0];
-assign wdata1 = wdata[15: 8];
-assign wdata2 = wdata[23:16];
-assign wdata3 = wdata[31:24];
+assign wdata0 = wdata_out[ 7: 0];
+assign wdata1 = wdata_out[15: 8];
+assign wdata2 = wdata_out[23:16];
+assign wdata3 = wdata_out[31:24];
 
 // read data logic
 data_ram0 ram0(

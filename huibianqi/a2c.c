@@ -33,7 +33,7 @@ static struct {
 	char* name;
 	int opcode;
 } types [] = {
-	{ "Rtype", 0x33 }, { "Itype", 0x13 }, { "sw", 0x23 }, { "lw", 0x03 },
+	{ "Rtype", 0x33 }, { "Itype", 0x13 }, { "stype", 0x23 }, { "ltype", 0x03 },
 	{ "Btype", 0x63 }, { "jalr", 0x67 }, { "jal", 0x6f }, { "lui", 0x37 },
 };
 
@@ -63,10 +63,26 @@ static struct btype{
 	{ "beq", 0 }, { "bne", 1 }, { "blt", 4 }, { "bge", 5 }, { "bltu", 6 }, { "bgeu", 7 },
 };
 
+static struct stype{
+	char* name;
+	int func3;
+} stypes[] = {
+	{ "sb", 0 }, { "sh", 1 }, { "sw", 2 },
+};
+
+static struct ltype{
+	char* name;
+	int func3;
+} ltypes[] = {
+	{ "lb", 0 }, { "lh", 1 }, { "lw", 2 }, { "lbu", 4 }, { "lhu", 5 },
+};
+
 int ntype = 8;
 int nrtype = 10;
 int nitype = 9;
 int nbtype = 6;
+int nstype = 3;
+int nltype = 5;
 
 int in_rtypes(char* op) {
 	for(int i=0; i<nrtype; i++) {
@@ -95,6 +111,25 @@ int in_btypes(char* op) {
 	return 0;
 }
 
+int in_stypes(char* op) {
+	for(int i=0; i<nstype; i++) {
+		if(!strcmp(op, stypes[i].name)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int in_ltypes(char* op) {
+	for(int i=0; i<nltype; i++) {
+		if(!strcmp(op, ltypes[i].name)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
 /* type */
 char *instr_type(char* op) {
 	if (in_rtypes(op)) {
@@ -105,6 +140,12 @@ char *instr_type(char* op) {
 	}
 	if (in_btypes(op)) {
 		return "Btype";
+	}
+	if (in_stypes(op)) {
+		return "stype";
+	}
+	if (in_ltypes(op)) {
+		return "ltype";
 	}
 	return op;
 }
@@ -203,8 +244,19 @@ void itype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, in
 }
 
 /* sw type decode */
-void swtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int*instr_func3, int* instr_rd) {
-	*instr_func3 = 2;
+void swtype_codes(char *op, char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int* instr_func3, int* instr_rd) {
+	int is_stype = 0;
+	for(int i=0; i<nstype; i++) {
+		if(!strcmp(op, stypes[i].name)) {
+			*instr_func3 = stypes[i].func3;
+			is_stype = 1;
+			break;
+		}
+	}
+
+	if(!is_stype) {
+		assert(0);
+	}
 
 	char *arg1 = strtok(arguments, ",");
 	char *arg2 = strtok(NULL, " ");
@@ -225,8 +277,21 @@ void swtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_
 }
 
 /* lw type decode */
-void lwtype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int*instr_func3, int* instr_rd) {
-	*instr_func3 = 2;
+void lwtype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int*instr_func3, int* instr_rd) {
+	int is_ltype = 0;
+
+	for(int i=0; i<nltype; i++) {
+		if(!strcmp(op, ltypes[i].name)) {
+			*instr_func3 = ltypes[i].func3;
+			is_ltype = 1;
+			break;
+		}
+	}
+
+	if(!is_ltype) {
+		assert(0);
+	}
+
 
 	char *arg1 = strtok(arguments, ",");
 	char *arg2 = strtok(NULL, " ");
@@ -401,10 +466,10 @@ int machinecode(char* str, int pos) {
 		itype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
 	else if(instr_opcode == 0x23) {
-		swtype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
+		swtype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
 	else if(instr_opcode == 0x03) {
-		lwtype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
+		lwtype_codes(op, arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
 	else if(instr_opcode == 0x37) {
 		luitype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
