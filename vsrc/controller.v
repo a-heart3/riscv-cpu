@@ -33,8 +33,8 @@ module controller(
 // type definition
 wire Rtype;
 wire Itype;
-wire lw;
-wire sw;
+wire ltype;
+wire stype;
 wire Btype;
 wire jalr;
 wire jal;
@@ -43,32 +43,32 @@ wire lui;
 // assign type
 assign Rtype = (opcode == 7'b011_0011);
 assign Itype = (opcode == 7'b001_0011);
-assign lw    = (opcode == 7'b000_0011);
-assign sw    = (opcode == 7'b010_0011);
+assign ltype = (opcode == 7'b000_0011);
+assign stype = (opcode == 7'b010_0011);
 assign Btype = (opcode == 7'b110_0011);
 assign jalr  = (opcode == 7'b110_0111);
 assign jal   = (opcode == 7'b110_1111);
 assign lui   = (opcode == 7'b011_0111);
 
 // MemWrite logic
-assign MemWrite = sw;
+assign MemWrite = stype;
 
 // RegWrite logic
-assign RegWrite = Rtype | Itype | lw | jalr | jal | lui;
+assign RegWrite = Rtype | Itype | ltype | jalr | jal | lui;
 
 // AluSrc logic
-assign ALUSrc = ({4{Rtype     }} & 4'b0001)
-              | ({4{Itype | lw}} & 4'b0010)
-              | ({4{sw        }} & 4'b0100)
-              | ({4{lui       }} & 4'b1000);
+assign ALUSrc = ({4{Rtype        }} & 4'b0001)
+              | ({4{Itype | ltype}} & 4'b0010)
+              | ({4{stype        }} & 4'b0100)
+              | ({4{lui          }} & 4'b1000);
 
 // MemtoReg logic
 assign MemtoReg = ({3{Rtype | Itype | lui}} & 3'b001)
-                | ({3{lw                 }} & 3'b010)
+                | ({3{ltype              }} & 3'b010)
                 | ({3{jal   | jalr       }} & 3'b100);
 
 // ALUControl logic
-assign ALUControl = {lui, sw, lw, Itype, Rtype};
+assign ALUControl = {lui, stype, ltype, Itype, Rtype};
 
 // BranchControl logiv
 assign BranchControl = {jal, jalr, Btype};

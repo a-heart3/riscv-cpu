@@ -23,10 +23,24 @@
 module data_ram(
     input         clk,
     input         we,
-    input  [ 2:0] mode,
+    input  [ 2:0] func3,
     input  [31:0] address,
     input  [31:0] wdata,
     output [31:0] rdata
+);
+
+// fenjie func3
+wire [1:0] func3_2;
+wire uint;
+wire [2:0] mode;
+
+assign func3_2 = func3[1:0];
+assign uint = func3[2];
+
+// decode mode
+mode_decoder mode_decoder_data(
+    .func3_2(func3_2),
+    .mode(mode) 
 );
 
 // first analyse we signal
@@ -105,6 +119,7 @@ data_ram3 ram3(
     .we (we3         )
 );
 
+/*
 // define 16 bits data and 32 bits data
 wire [15:0] data16_0;
 wire [15:0] data16_1;
@@ -142,5 +157,17 @@ tmux3_1 Memout(
     .src3  (data32 ),
     .sel   (mode   ),
     .result(rdata  )
+);
+*/
+
+memory_out memory_out_instr(
+    .data_0(rdata0 ),
+    .data_1(rdata1 ),
+    .data_2(rdata2 ),
+    .data_3(rdata3 ),
+    .mode  (mode   ),
+    .uint  (uint   ),
+    .cs    (cs     ),
+    .data  (rdata  )
 );
 endmodule

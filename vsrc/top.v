@@ -63,7 +63,7 @@ instruction_ram instruction_ram(
 instr_ram instr_ram(
     .clk    (clk        ),
     .we     (1'b0       ),
-    .mode   (3'b100     ),
+    .func3  (3'b010     ),
     .address(pc_current ),
     .wdata  (32'd1      ),
     .rdata  (instr      )
@@ -228,7 +228,7 @@ data_ram data_ram(
 data_ram data_ram(
     .clk    (clk       ),
     .we     (MemWrite  ),
-    .mode   (3'b100    ),
+    .func3  (func3     ),
     .address(aluresult ),
     .wdata  (rdata2    ),
     .rdata  (Memdata   )
