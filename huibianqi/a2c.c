@@ -308,7 +308,7 @@ void btype_codes(char* op, char* arguments, int* instr_func7, int* instr_rs2, in
 	/* 这里为了适应vivado当前的让ram形式做了改变，只需要记录offset即可
 	 * 后续修改ram形式需要更改代码
 	 */
-	int offset = branch_pos - (pos + 1);
+	int offset = (branch_pos - (pos + 1)) * 4;         // 更改memory之后，每次从指令ram取出4字节指令，地址加4
 	// // printf("the branch address is %d\n", offset);
 	offset = offset & (0x00000fff);
 	*instr_func7 = ((offset >> 5) & 0x40) | ((offset >> 4) & 0x3f);

@@ -49,7 +49,7 @@ pc pc(
     .pc_next   (pc_next    ),
     .pc_current(pc_current )
 );
-
+/*
 instruction_ram instruction_ram(
     .clk(clk        ),
     .we (1'b0       ), // instruction ram can not wrtie
@@ -57,6 +57,18 @@ instruction_ram instruction_ram(
     .d  (32'd1      ), // anything, write has been forbidden
     .spo(instr      )
 );
+*/
+
+
+instr_ram instr_ram(
+    .clk    (clk        ),
+    .we     (1'b0       ),
+    .mode   (3'b100     ),
+    .address(pc_current ),
+    .wdata  (32'd1      ),
+    .rdata  (instr      )
+);
+
 
 // ID
 // ID control input definition, branch_control need data1, data2 has been definited
@@ -160,9 +172,9 @@ wire [31:0] offset_jalr;
 
 // ID branch output definition, pc_next has been definition before
 // ID branch assign logic
-assign pc_4 = pc_current + 32'd1;
-assign offset_btype = {{21{instr[31]}}, instr[ 7], instr[30:25], instr[11: 8]};
-assign offset_jal   = {{13{instr[31]}}, instr[19:12], instr[20], instr[30:21]};
+assign pc_4 = pc_current + 32'd4;
+assign offset_btype = {{20{instr[31]}}, instr[ 7], instr[30:25], instr[11: 8], 1'b0};
+assign offset_jal   = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
 assign offset_jalr  = ({{20{instr[31]}}, instr[31:20]} + rdata1) & 32'hfffffffe;   // last bit is 0
 assign pc_next1 = pc_4;
 add add2(.data1(pc_4), .data2(offset_btype), .add_result(pc_next2));
@@ -203,6 +215,7 @@ alu alu(
 wire [31:0] Memdata;
 
 // SW assign logic
+/*
 data_ram data_ram(
     .clk(clk       ),
     .we (MemWrite  ),
@@ -210,6 +223,17 @@ data_ram data_ram(
     .d  (rdata2    ),
     .spo(Memdata   )
 );
+*/
+
+data_ram data_ram(
+    .clk    (clk       ),
+    .we     (MemWrite  ),
+    .mode   (3'b100    ),
+    .address(aluresult ),
+    .wdata  (rdata2    ),
+    .rdata  (Memdata   )
+);
+
 
 // WB
 // WB input definition, pc_4, Memdata, aluresult has been definition
