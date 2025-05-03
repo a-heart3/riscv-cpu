@@ -78,12 +78,12 @@ wire       instr30;
 
 // ID control output definition, RegWrite, AluSrc has been definition
 wire [ 4:0] ALUControl;
-wire [ 2:0] BranchControl;
+wire [ 3:0] BranchControl;
 wire        MemWrite;
 wire        RegWrite;
 wire [ 3:0] AluSrc;
-wire [ 2:0] MemtoReg;
-wire [ 3:0] branch_type;
+wire [ 3:0] MemtoReg;
+wire [ 4:0] branch_type;
 wire [10:0] ALUop;
 
 // ID control assign logic
@@ -165,10 +165,12 @@ wire [31:0] pc_next1;
 wire [31:0] pc_next2;
 wire [31:0] pc_next3;
 wire [31:0] pc_next4;
+wire [31:0] pc_next5;
 wire [31:0] pc_4;
 wire [31:0] offset_btype;
 wire [31:0] offset_jal;
 wire [31:0] offset_jalr;
+wire [31:0] offset_auipc;
 
 // ID branch output definition, pc_next has been definition before
 // ID branch assign logic
@@ -176,17 +178,20 @@ assign pc_4 = pc_current + 32'd4;
 assign offset_btype = {{20{instr[31]}}, instr[ 7], instr[30:25], instr[11: 8], 1'b0};
 assign offset_jal   = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
 assign offset_jalr  = ({{20{instr[31]}}, instr[31:20]} + rdata1) & 32'hfffffffe;   // last bit is 0
+assign offset_auipc = {instr[31:12], 12'd0};
 assign pc_next1 = pc_4;
 add add2(.data1(pc_4), .data2(offset_btype), .add_result(pc_next2));
 add add3(.data1(pc_4), .data2(offset_jal  ), .add_result(pc_next3));
 add add4(.data1(pc_4), .data2(offset_jalr ), .add_result(pc_next4));
+add add5(.data1(pc_4), .data2(offset_auipc), .add_result(pc_next5));
 
 
-tmux4_1 tmux4_1_pcnext(
+tmux5_1 tmux5_1_pcnext(
     .src1  (pc_next1    ),
     .src2  (pc_next2    ),
     .src3  (pc_next3    ),
     .src4  (pc_next4    ),
+    .src5  (pc_next5    ),
     .sel   (branch_type ),
     .result(pc_next     )
 );
@@ -239,10 +244,11 @@ data_ram data_ram(
 // WB input definition, pc_4, Memdata, aluresult has been definition
 // WB output definition, wdata has been definition
 // WB assign logic
-tmux3_1 tmux3_1_mem2reg(
+tmux4_1 tmux4_1_mem2reg(
     .src1  (aluresult ),
     .src2  (Memdata   ),
     .src3  (pc_4      ),
+    .src4  (pc_next5  ),
     .sel   (MemtoReg  ),
     .result(wdata     )
 );

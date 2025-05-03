@@ -21,17 +21,18 @@
 
 
 module Branch_control(
-    input  [ 2:0] BranchControl,
+    input  [ 3:0] BranchControl,
     input  [31:0] data1,
     input  [31:0] data2,
     input  [ 2:0] func3, 
-    output [ 3:0] branch_type 
+    output [ 4:0] branch_type 
 );
 
 // type
 wire Btype = BranchControl[0];
 wire jalr  = BranchControl[1];
 wire jal   = BranchControl[2]; 
+wire auipc = BranchControl[3];
 
 // comp module
 wire zero;
@@ -65,6 +66,7 @@ wire pc_btype;
 wire pc_jal;
 wire pc_jalr;
 wire pc_4;
+wire pc_auipc;
 
 assign pc_btype = Btype & 
             ( (beq  & zero ) | (bne  & ~zero)
@@ -73,7 +75,8 @@ assign pc_btype = Btype &
 
 assign pc_jal = jal;
 assign pc_jalr = jalr;
-assign pc_4 = ~pc_btype & ~pc_jal & ~pc_jalr;
+assign pc_auipc = auipc;
+assign pc_4 = ~pc_btype & ~pc_jal & ~pc_jalr & ~pc_auipc;
 
-assign branch_type = {pc_jalr, pc_jal, pc_btype, pc_4};
+assign branch_type = {pc_auipc, pc_jalr, pc_jal, pc_btype, pc_4};
 endmodule

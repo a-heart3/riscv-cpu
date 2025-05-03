@@ -35,6 +35,7 @@ static struct {
 } types [] = {
 	{ "Rtype", 0x33 }, { "Itype", 0x13 }, { "stype", 0x23 }, { "ltype", 0x03 },
 	{ "Btype", 0x63 }, { "jalr", 0x67 }, { "jal", 0x6f }, { "lui", 0x37 },
+	{ "auipc", 0x17 },
 };
 
 static struct {
@@ -77,7 +78,7 @@ static struct ltype{
 	{ "lb", 0 }, { "lh", 1 }, { "lw", 2 }, { "lbu", 4 }, { "lhu", 5 },
 };
 
-int ntype = 8;
+int ntype = 9;
 int nrtype = 10;
 int nitype = 9;
 int nbtype = 6;
@@ -441,6 +442,25 @@ void jaltype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr
 	*instr_func3 = (address >> 11) & 7;
 }
 
+/* auipc type decode */
+void auipctype_codes(char* arguments, int* instr_func7, int* instr_rs2, int* instr_rs1, int* instr_func3, int* instr_rd) {
+	char *arg1 = strtok(arguments, ",");
+	char *arg2 = strtok(NULL, " ");
+	unsigned int imme_num = 0;
+	// // printf("test lui type arg1 is %s\n", arg1);
+	// // printf("test lui type arg2 is %s\n", arg2);
+
+	sscanf(arg1, "%d", &imme_num);
+	printf("%d\n", imme_num);
+	*instr_func7 = imme_num >> 25;
+	*instr_rs2 = (imme_num >> 20) & 0x1f;
+	*instr_rs1 = (imme_num >> 15) & 0x1f;
+	*instr_func3 = (imme_num >> 12) & 0x3;
+	*instr_rd = regnum(arg2);
+}
+
+
+
 int machinecode(char* str, int pos) {
 	char instr[100];
 	strcpy(instr, str);
@@ -482,6 +502,9 @@ int machinecode(char* str, int pos) {
 	}
 	else if(instr_opcode == 0x6f) {
 		jaltype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd, pos);
+	}
+	else if(instr_opcode == 0x17) {
+		auipctype_codes(arguments, &instr_func7, &instr_rs2, &instr_rs1, &instr_func3, &instr_rd);
 	}
 	int result = instr_opcode | (instr_rd<<7) | (instr_func3<<12) | (instr_rs1<<15) | (instr_rs2<<20) | (instr_func7<<25);
 	return result;
