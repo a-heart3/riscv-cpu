@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 05/04/2025 09:31:38 PM
+// Create Date: 05/06/2025 06:37:02 PM
 // Design Name: 
 // Module Name: instr_ram_tb
 // Project Name: 
@@ -21,38 +21,39 @@
 
 
 module instr_ram_tb();
-
 reg clk;
-reg [31:0] addr;
-reg [31:0] wdata;
-reg we;
-wire [31:0] rdata;
+reg  [31:0] instr_sram_addr;
+reg  [31:0] instr_sram_wdata;
+reg         instr_sram_we;
+reg         instr_sram_en;
+wire [31:0] instr;
 
 instr_ram instr_ram(
-    .clk    (clk  ),
-    .we     (we   ),
-    .address(addr ),
-    .wdata  (wdata),
-    .rdata  (rdata)
+    .clk(clk),
+    .instr_sram_addr(instr_sram_addr),
+    .instr_sram_wdata(instr_sram_wdata),
+    .instr_sram_we(instr_sram_we),
+    .instr_sram_en(instr_sram_en),
+    .instr(instr)
 );
 
-initial begin
-    clk = 0;
-end
-
 always begin
-    #5;
+    #10;
     clk = ~clk;
 end
 
 initial begin
-    addr = 32'd1;
-    wdata = 32'd1;
-    we = 0;
-    #10;
-    we = 1;
-    #10;
-    we = 0;
+    clk = 0;
+    instr_sram_en = 0;
+    instr_sram_wdata = 32'd0;
+    instr_sram_addr = 32'd0;
+    instr_sram_we = 0;
+    #20;
+    instr_sram_addr = 32'd1;
+end
 
+always begin
+    #5;
+    instr_sram_en = ~instr_sram_en;
 end
 endmodule
