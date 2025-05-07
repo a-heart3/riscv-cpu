@@ -22,12 +22,16 @@
 
 module controller(
     input  [6:0] opcode,
+    input  [2:0] func3,
     output       MemWrite,
+    output       MemRead,
     output       RegWrite,
     output [3:0] ALUSrc,
     output [3:0] MemtoReg,
     output [4:0] ALUControl,
-    output [3:0] BranchControl
+    output [3:0] BranchControl,
+    output [2:0] Mem_mode,              // memory type:8?16?32?
+    output       Mem_read_us            // mem read unsigned or signed
 );
 
 // type definition
@@ -73,7 +77,21 @@ assign MemtoReg = ({4{Rtype | Itype | lui}} & 4'b0001)
 // ALUControl logic
 assign ALUControl = {lui, stype, ltype, Itype, Rtype};
 
-// BranchControl logiv
+// BranchControl logic
 assign BranchControl = {auipc, jal, jalr, Btype};
 
+// MemRead logic
+assign MemRead = ltype;
+
+// Memmode logic
+wire type8;
+wire type16;
+wire type32;
+
+assign type8  = (func3 == 3'b000 | func3 == 3'b100);
+assign type16 = (func3 == 3'b001 | func3 == 3'b101);
+assign type32 = (func3 == 3'b010);
+
+assign Mem_read_us = (func3 == 3'b100 | func3 == 3'b101);           // signed when Mem_read_us is 0, oherwise is unsigned
+assign Mem_mode = {type32, type16, type8};
 endmodule

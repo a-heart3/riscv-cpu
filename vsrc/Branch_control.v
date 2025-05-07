@@ -25,7 +25,8 @@ module Branch_control(
     input  [31:0] data1,
     input  [31:0] data2,
     input  [ 2:0] func3, 
-    output [ 4:0] branch_type 
+    output [ 3:0] branch_type,
+    output        is_branch
 );
 
 // type
@@ -65,7 +66,6 @@ assign bgeu = (func3 == 3'b111);
 wire pc_btype;
 wire pc_jal;
 wire pc_jalr;
-wire pc_4;
 wire pc_auipc;
 
 assign pc_btype = Btype & 
@@ -76,7 +76,7 @@ assign pc_btype = Btype &
 assign pc_jal = jal;
 assign pc_jalr = jalr;
 assign pc_auipc = auipc;
-assign pc_4 = ~pc_btype & ~pc_jal & ~pc_jalr & ~pc_auipc;
 
-assign branch_type = {pc_auipc, pc_jalr, pc_jal, pc_btype, pc_4};
+assign branch_type = {pc_auipc, pc_jal, pc_jalr, pc_btype};
+assign is_branch = pc_auipc | pc_jalr | pc_jal | pc_btype;
 endmodule
