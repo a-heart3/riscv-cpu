@@ -21,6 +21,10 @@
 `include "pipeline.vh"
 
 module ID(
+    input clk,
+    input [4:0] wb_rd,
+    input wb_we,
+    input [31:0] wb_wdata,
     input [`FS_DATA -1:0] fs_data,
     output [`BRANCH_DATA -1:0] branch_data
 );
@@ -97,6 +101,35 @@ Alu_controller Alu_controller(
 
 
 // ALUSrc generate
+// immediate data
+wire [19:0] lui_imme;
+wire [11:0] itype_imme;
+wire [11:0] stype_imme;
+assign lui_imme = instr[31:12];
+assign itype_imme = instr[31:20];
+assign stype_imme = {instr[31:25], instr[11:7]};
+
+// data
+wire [31:0] lui_data;
+wire [31:0] itype_data;
+wire [31:0] stype_data;
+assign lui_data = {{12{lui_imme[19]}}, lui_imme};
+assign itype_data = {{20{itype_imme[11]}}, itype_data};
+assign stype_data = {{20{stype_imme[11]}}, stype_data};
+
+regfile regfile(
+    .clk   (clk      ),
+    .we    (wb_we    ),
+    .raddr1(rs1      ),
+    .raddr2(rs2      ),
+    .waddr (wb_rd    ),
+    .wdata (wb_wdata ),
+    .rdata1(data1    ),
+    .rdata2(data2    )
+);
+
+
+
 
 
 endmodule
