@@ -109,7 +109,7 @@ assign lui_imme = instr[31:12];
 assign itype_imme = instr[31:20];
 assign stype_imme = {instr[31:25], instr[11:7]};
 
-// data
+// ALUSrc2 data
 wire [31:0] lui_data;
 wire [31:0] itype_data;
 wire [31:0] stype_data;
@@ -128,7 +128,30 @@ regfile regfile(
     .rdata2(data2    )
 );
 
+tmux4_1 ALUSrc_sel(
+    .src1(data2      ),
+    .src2(itype_data ),
+    .src3(stype_data ),
+    .src4(lui_data   ),
+    .sel (ALUSrc     )
+);
 
+// branch address definition
+// branch offset
+wire [31:0] jal_offset;
+wire [31:0] jalr_offset;
+wire [31:0] btype_offset;
+wire [31:0] auipc_offset;
+assign btype_offset = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
+assign jal_offset = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+assign jalr_offset = ({{20{instr[31]}}, instr[31:20]} + data1) & 32'hfffffffe;
+assign auipc_offset = {instr[31:12], 12'd0};
+
+// branch address data
+wire [31:0] btype_address;
+wire [31:0] jal_address;
+wire [31:0] jalr_address;
+wire [31:0] auipc_address;
 
 
 
