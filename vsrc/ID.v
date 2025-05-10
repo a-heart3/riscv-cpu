@@ -3,7 +3,7 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 05/07/2025 02:43:24 PM
+// Create Date: 05/10/2025 05:44:47 PM
 // Design Name: 
 // Module Name: ID
 // Project Name: 
@@ -22,36 +22,63 @@
 
 module ID(
     input clk,
-    input [4:0] wb_rd,
-    input wb_we,
+    // data from fs_ds_reg
+    input [`FS_DATA -1:0] fs_ds_reg_data,
+    // data from wb
     input [31:0] wb_wdata,
-    input [`FS_DATA -1:0] fs_data,
-    output [`BRANCH_DATA -1:0] branch_data
+    input [ 4:0] wb_rd,
+    input        wb_we,
+    // branch data to pc
+    output [`BRANCH_DATA -1:0] ds_branch_data,
+    // branch data to id_ex_reg
+    output [`ID_DATA -1:0] ds_data
 );
 
-// split fs_data
-wire [31:0] pc;
+// ID input data
 wire [31:0] instr;
-assign pc = fs_data[31:0];
-assign instr = fs_data[63:32];
+wire [31:0] pc;
+assign instr = fs_ds_reg_data[`FS_DATA -1: `FS_DATA -32];
+assign pc    = fs_ds_reg_data[`FS_DATA -33: 0];
 
-// generate control signal
-// split instr to generate control signal;
-wire [6:0] opcode;
-wire [4:0] rd;
-wire [2:0] func3;
-wire [4:0] rs1;
-wire [4:0] rs2;
-wire       instr30;
 
-assign {rs2, rs1, func3, rd, opcode} = instr[24:0];
+// ID output DATA
+// controller
+wire ds_MemWrite;
+wire ds_MemRead;
+wire ds_RegWrite;
+wire [3:0] ds_MemtoReg;
+wire [2:0] ds_Mem_mode;
+wire       ds_Mem_read_us;
+// branch control
+wire [31:0] ds_branch_addr;
+wire        ds_branch_control;
+// ALU control
+wire [10:0] ds_OpControl;
+// data for use
+wire [31:0] ds_data1;
+wire [31:0] ds_data2;
+wire [ 4:0] ds_rd; 
+
+// split 
+wire        instr30;
+wire [ 6:0] opcode;
+wire [ 4:0] rd;
+wire [ 2:0] func3;
+wire [ 4:0] rs1;
+wire [ 4:0] rs2;
+
 assign instr30 = instr[30];
+assign opcode  = instr[ 6: 0];
+assign rd      = instr[11: 7];
+assign func3   = instr[14:12];
+assign rs1     = instr[19:15];
+assign rs2     = instr[24:20];
 
-// wire definition for control signal
-//controller
-wire       MemWrite;
-wire       MemRead;
-wire       RegWrite;
+// connect with controller
+// signal definition
+wire MemWrite;
+wire MemRead;
+wire RegWrite;
 wire [3:0] ALUSrc;
 wire [3:0] MemtoReg;
 wire [4:0] ALUControl;
@@ -59,16 +86,6 @@ wire [3:0] BranchControl;
 wire [2:0] Mem_mode;
 wire       Mem_read_us;
 
-// branch_controller
-wire [31:0] data1;
-wire [31:0] data2;
-wire [3:0] branch_type;
-wire is_branch;
-
-// Alu_controller
-wire [10:0] OpControl;
-
-// combination logic
 controller controller(
     .opcode       (opcode        ),
     .func3        (func3         ),
@@ -83,76 +100,112 @@ controller controller(
     .Mem_read_us  (Mem_read_us   )
 );
 
-Branch_control Branch_control(
-    .BranchControl(BranchControl ),
-    .data1        (data1         ),
-    .data2        (data2         ),
-    .func3        (func3         ),
-    .branch_type  (branch_type   ),
-    .is_branch    (is_branch     )
-);
+// connect with Alu_controller
+// signal define
+wire [10:0] OpControl;
 
 Alu_controller Alu_controller(
-    .ALUControl(ALUControl ),
-    .func3     (func3      ),
-    .instr30   (instr30    ),
-    .OpControl (Opcontrol  )
+    .ALUControl(ALUControl),
+    .func3(func3),
+    .instr30(instr30),
+    .OpControl(OpControl)
 );
 
+// connect with branch_controller
+// signal define
+wire [31:0] rdata1;
+wire [31:0] rdata2;
+wire [ 3:0] branch_type;
+wire        branch_control;
 
-// ALUSrc generate
-// immediate data
-wire [19:0] lui_imme;
-wire [11:0] itype_imme;
-wire [11:0] stype_imme;
-assign lui_imme = instr[31:12];
-assign itype_imme = instr[31:20];
-assign stype_imme = {instr[31:25], instr[11:7]};
+Branch_control Branch_control(
+    .BranchControl (BranchControl ),
+    .data1         (rdata1         ),
+    .data2         (rdata2         ),
+    .func3         (func3         ),
+    .branch_type   (branch_type   ),
+    .branch_control(branch_control)
+);
 
-// ALUSrc2 data
-wire [31:0] lui_data;
-wire [31:0] itype_data;
-wire [31:0] stype_data;
-assign lui_data = {{12{lui_imme[19]}}, lui_imme};
-assign itype_data = {{20{itype_imme[11]}}, itype_data};
-assign stype_data = {{20{stype_imme[11]}}, stype_data};
+// branch address
+wire [31:0] offset_btype;
+wire [31:0] offset_jal;
+wire [31:0] offset_jalr;
+wire [31:0] offset_auipc;
+wire [31:0] offset;
+wire [31:0] branch_addr;
 
-regfile regfile(
+assign offset_btype = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
+assign offset_jal   = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+assign offset_jalr  = {{20{instr[31]}}, instr[31:20], instr[20], instr[30:21], 1'b0};
+assign offset_auipc = {instr[31:12], 12'd0};
+
+// select offset
+tmux4_1 offset_select(
+    .src1  (offset_btype ),
+    .src2  (offset_jal   ),
+    .src3  (offset_jalr  ),
+    .src4  (offset_auipc ),
+    .sel   (branch_type  ),
+    .result(offset       )
+);
+
+add add(.data1(pc), .data2(offset), .add_result(branch_addr));
+
+// access regfile
+regfile rf(
     .clk   (clk      ),
     .we    (wb_we    ),
     .raddr1(rs1      ),
     .raddr2(rs2      ),
     .waddr (wb_rd    ),
     .wdata (wb_wdata ),
-    .rdata1(data1    ),
-    .rdata2(data2    )
+    .rdata1(rdata1    ),
+    .rdata2(rdata2    )
 );
 
-tmux4_1 ALUSrc_sel(
-    .src1(data2      ),
-    .src2(itype_data ),
-    .src3(stype_data ),
-    .src4(lui_data   ),
-    .sel (ALUSrc     )
+// select src2
+// signal define
+wire [31:0] imme_itype;
+wire [31:0] imme_stype;
+wire [31:0] imme_lui;
+wire [31:0] data2;
+
+assign imme_itype = {{20{instr[31]}}, instr[31:20]};
+assign imme_stype = {{20{instr[31]}}, instr[31:25], instr[11:7]};
+assign imme_lui   = {{12{instr[31]}}, instr[31:12]};
+
+tmux4_1 Srcselect(
+    .src1  (rdata2),
+    .src2  (imme_itype),
+    .src3  (imme_stype),
+    .src4  (imme_lui),
+    .sel   (ALUSrc),
+    .result(data2)
 );
 
-// branch address definition
-// branch offset
-wire [31:0] jal_offset;
-wire [31:0] jalr_offset;
-wire [31:0] btype_offset;
-wire [31:0] auipc_offset;
-assign btype_offset = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
-assign jal_offset = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
-assign jalr_offset = ({{20{instr[31]}}, instr[31:20]} + data1) & 32'hfffffffe;
-assign auipc_offset = {instr[31:12], 12'd0};
+// output signal
+assign ds_MemWrite = MemWrite;
+assign ds_MemRead = MemRead;
+assign ds_RegWrite = RegWrite;
+assign ds_MemtoReg = MemtoReg;
+assign ds_Mem_mode = Mem_mode;
+assign ds_Mem_read_us = Mem_read_us;
+assign ds_branch_addr = branch_addr;
+assign ds_branch_control = branch_control;
+assign ds_OpControl = OpControl;
+assign ds_data1 = rdata1;
+assign ds_data2 = data2;
+assign ds_rd = rd;
 
-// branch address data
-wire [31:0] btype_address;
-wire [31:0] jal_address;
-wire [31:0] jalr_address;
-wire [31:0] auipc_address;
+// output data;
+assign ds_data = {ds_MemWrite, ds_MemRead, ds_RegWrite, ds_MemtoReg, ds_Mem_mode,
+                  ds_Mem_read_us, ds_OpControl, ds_data1, ds_data2, ds_rd};
+
+assign ds_branch_data = {ds_branch_addr, ds_branch_control};
 
 
+
+// connect controller
 
 endmodule

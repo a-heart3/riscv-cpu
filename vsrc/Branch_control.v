@@ -26,7 +26,7 @@ module Branch_control(
     input  [31:0] data2,
     input  [ 2:0] func3, 
     output [ 3:0] branch_type,
-    output        is_branch
+    output        branch_control
 );
 
 // type
@@ -78,5 +78,5 @@ assign pc_jalr = jalr;
 assign pc_auipc = auipc;
 
 assign branch_type = {pc_auipc, pc_jal, pc_jalr, pc_btype};
-assign is_branch = pc_auipc | pc_jalr | pc_jal | pc_btype;
+assign branch_control = pc_auipc | pc_jalr | pc_jal | pc_btype;
 endmodule

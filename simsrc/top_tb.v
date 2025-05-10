@@ -21,30 +21,41 @@
 
 
 module top_tb();
-reg clk;
-reg reset;
-reg [32:0] branch_data;
-reg  ds_ex_reg_allow_in;
-wire ds_to_ex_reg_valid;
-wire [63:0] fs_ds_reg_data;
+reg         clk;
+reg         reset;
+reg  [ 4:0] wb_rd;
+reg  [31:0] wb_wdata;
+reg         wb_we;
+reg         ex_mem_reg_allow_in;
+wire        ex_to_mem_reg_valid;
+wire [90:0] ds_ex_reg_data;
 
 top top(
-    .clk               (clk               ),
-    .reset             (reset             ),
-    .ds_ex_reg_allow_in(ds_ex_reg_allow_in),
-    .branch_data       (branch_data       ),
-    .ds_to_ex_reg_valid(ds_to_ex_reg_valid),
-    .fs_ds_reg_data    (fs_ds_reg_data    )
+    .clk                (clk                 ),
+    .reset              (reset               ),
+    .wb_rd              (wb_rd               ),
+    .wb_wdata           (wb_wdata            ),
+    .wb_we              (wb_we               ),
+    .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
+    .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
+    .ds_ex_reg_data     (ds_ex_reg_data      )
 );
 
 initial begin
     clk <= 1'b0;
     reset <= 1'b1;
-    ds_ex_reg_allow_in = 1'b0;
-    branch_data <= 33'h123456788;
+    wb_rd <= 5'b00001;
+    wb_wdata <= 32'd1;
+    wb_we <= 1'b1;
+    ex_mem_reg_allow_in <= 1'b0;
     #10;
     reset <= 1'b0;
-    ds_ex_reg_allow_in = 1'b1;
+    ex_mem_reg_allow_in = 1'b1;
+    wb_rd <= 5'b00010;
+    wb_wdata <= 32'd2;
+    wb_we <= 1'b1;
+    #10;
+    wb_we <= 1'b0;
 end
 
 always begin
