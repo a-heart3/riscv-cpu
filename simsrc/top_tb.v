@@ -28,7 +28,7 @@ reg  [31:0] wb_wdata;
 reg         wb_we;
 reg         ex_mem_reg_allow_in;
 wire        ex_to_mem_reg_valid;
-wire [90:0] ds_ex_reg_data;
+wire [79:0] ex_data;
 
 top top(
     .clk                (clk                 ),
@@ -38,7 +38,7 @@ top top(
     .wb_we              (wb_we               ),
     .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
     .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
-    .ds_ex_reg_data     (ds_ex_reg_data      )
+    .ex_data            (ex_data             )
 );
 
 initial begin
