@@ -32,14 +32,15 @@ module ex_Mem_reg(
     input mem_wb_reg_allow_in,
     output mem_to_wb_reg_valid,
     // data to Mem stage
-    output [`EX_MEM_DATA -1:0] ex_mem_reg_data,
+    output [`MEM_DATA -1:0] mem_data,
     // output data ram
     output [31:0] data_sram_addr,
     output [31:0] data_sram_wdata,
     output        data_sram_en,
     output        data_sram_we,
     output [ 2:0] data_sram_mode,
-    output        data_sram_us
+    output        data_sram_us,
+    input  [31:0] data_sram_rdata
 );
 
 // ex_mem_reg data
@@ -52,9 +53,12 @@ wire        Mem_read_us;
 wire [31:0] data2;
 wire [ 4:0] rd;
 wire [31:0] result;
+wire [`EX_MEM_DATA -1:0] ex_mem_reg_data;
 
 assign {MemWrite, MemRead, RegWrite, MemtoReg,
         Mem_mode, Mem_read_us, data2, rd,result} = ex_data; 
+
+assign ex_mem_reg_data = {RegWrite, MemtoReg, rd, result};
 
 // ex_Mem_reg pipeline control
 reg ex_mem_reg_valid;
@@ -88,5 +92,5 @@ assign data_sram_mode  = Mem_mode;
 assign data_sram_us    = Mem_read_us;
 
 // out data
-assign ex_mem_reg_data = {RegWrite, MemtoReg, rd, result};
+assign mem_data = {data, data_sram_rdata};
 endmodule

@@ -141,7 +141,7 @@ assign offset_jalr  = {{20{instr[31]}}, instr[31:20], instr[20], instr[30:21], 1
 assign offset_auipc = {instr[31:12], 12'd0};
 
 // select offset
-tmux4_1 offset_select(
+tmux4_1 #(32) offset_select(
     .src1  (offset_btype ),
     .src2  (offset_jal   ),
     .src3  (offset_jalr  ),
@@ -175,13 +175,13 @@ assign imme_itype = {{20{instr[31]}}, instr[31:20]};
 assign imme_stype = {{20{instr[31]}}, instr[31:25], instr[11:7]};
 assign imme_lui   = {{12{instr[31]}}, instr[31:12]};
 
-tmux4_1 Srcselect(
-    .src1  (rdata2),
-    .src2  (imme_itype),
-    .src3  (imme_stype),
-    .src4  (imme_lui),
-    .sel   (ALUSrc),
-    .result(data2)
+tmux4_1 #(32) Srcselect(
+    .src1  (rdata2     ),
+    .src2  (imme_itype ),
+    .src3  (imme_stype ),
+    .src4  (imme_lui   ),
+    .sel   (ALUSrc     ),
+    .result(data2      )
 );
 
 // output signal

@@ -26,9 +26,9 @@ module top(
     input   [ 4:0]         wb_rd,
     input   [31:0]         wb_wdata,
     input                  wb_we,
-    input                  ex_mem_reg_allow_in,
-    output                 ex_to_mem_reg_valid,
-    output [`EX_DATA -1:0] ex_data
+    input                  mem_wb_reg_allow_in,
+    output                 mem_to_wb_reg_valid,
+    output  [`MEM_DATA -1:0] mem_data
 );
 
 // wire between fs and instr_ram
@@ -105,6 +105,8 @@ ID ID(
 // connect with ds_ex_reg
 // wire between ds_ex_reg and ex
 wire [`ID_DATA -1:0] ds_ex_reg_data;
+wire ex_to_mem_reg_valid;
+wire ex_mem_reg_allow_in;
 ds_ex_reg ds_ex_reg(
     .clk                (clk                 ),
     .reset              (reset               ),
@@ -118,11 +120,49 @@ ds_ex_reg ds_ex_reg(
 
 // connect EX
 // wire between ds_ex_reg and EX
+wire [`EX_DATA -1:0] ex_data;
 ex ex(
     .ds_ex_reg_data (ds_ex_reg_data ),
     .ex_data        (ex_data        )
 );
 
+// connect ex_mem_reg
+wire [31:0] data_sram_addr;
+wire [31:0] data_sram_wdata;
+wire        data_sram_en;
+wire        data_sram_we;
+wire [ 2:0] data_sram_mode;
+wire        data_sram_us;
+wire [31:0] data_sram_rdata;
+
+ex_Mem_reg ex_Mem_reg(
+    .clk                (clk                 ),
+    .reset              (reset               ),
+    .ex_data            (ex_data             ),
+    .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
+    .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
+    .mem_wb_reg_allow_in(mem_wb_reg_allow_in ),
+    .mem_to_wb_reg_valid(mem_to_wb_reg_valid ),
+    .mem_data           (mem_data            ),
+    .data_sram_addr     (data_sram_addr      ),
+    .data_sram_wdata    (data_sram_wdata     ),
+    .data_sram_en       (data_sram_en        ),
+    .data_sram_we       (data_sram_we        ),
+    .data_sram_mode     (data_sram_mode      ),
+    .data_sram_us       (data_sram_us        ),
+    .data_sram_rdata    (data_sram_rdata     )
+);
+
+data_ram data_ram(
+    .clk            (clk             ),
+    .data_sram_addr (data_sram_addr  ),
+    .data_sram_wdata(data_sram_wdata ),
+    .data_sram_en   (data_sram_en    ),
+    .data_sram_we   (data_sram_we    ),
+    .data_sram_mode (data_sram_mode  ),
+    .data_sram_us   (data_sram_us    ),
+    .data_sram_rdata(data_sram_rdata )
+);
 
 endmodule
  

@@ -26,9 +26,9 @@ reg         reset;
 reg  [ 4:0] wb_rd;
 reg  [31:0] wb_wdata;
 reg         wb_we;
-reg         ex_mem_reg_allow_in;
-wire        ex_to_mem_reg_valid;
-wire [79:0] ex_data;
+reg         mem_wb_reg_allow_in;
+wire        mem_to_wb_reg_valid;
+wire [73:0] mem_data;
 
 top top(
     .clk                (clk                 ),
@@ -36,9 +36,9 @@ top top(
     .wb_rd              (wb_rd               ),
     .wb_wdata           (wb_wdata            ),
     .wb_we              (wb_we               ),
-    .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
-    .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
-    .ex_data            (ex_data             )
+    .mem_wb_reg_allow_in(mem_wb_reg_allow_in ),
+    .mem_to_wb_reg_valid(mem_to_wb_reg_valid ),
+    .mem_data           (mem_data            )
 );
 
 initial begin
@@ -47,10 +47,10 @@ initial begin
     wb_rd <= 5'b00001;
     wb_wdata <= 32'd1;
     wb_we <= 1'b1;
-    ex_mem_reg_allow_in <= 1'b0;
+    mem_wb_reg_allow_in <= 1'b0;
     #10;
     reset <= 1'b0;
-    ex_mem_reg_allow_in = 1'b1;
+    mem_wb_reg_allow_in = 1'b1;
     wb_rd <= 5'b00010;
     wb_wdata <= 32'd2;
     wb_we <= 1'b1;
