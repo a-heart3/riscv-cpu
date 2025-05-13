@@ -36,10 +36,11 @@ wire [10:0] OpControl;
 wire [31:0] data1;
 wire [31:0] data2;
 wire [ 4:0] rd;
+wire [31:0] rdata2;
 
 assign {MemWrite, MemRead, RegWrite, MemtoReg,
         Mem_mode, Mem_read_us, OpControl, data1,
-        data2, rd} = ds_ex_reg_data;
+        data2, rd, rdata2} = ds_ex_reg_data;
 
 // ex stage data
 wire ex_MemWrite;
@@ -51,6 +52,7 @@ wire        ex_Mem_read_us;
 wire [31:0] ex_data2;
 wire [ 4:0] ex_rd;
 wire [31:0] ex_result;
+wire [31:0] ex_rdata2;
 
 // alu execution
 // signal define
@@ -69,9 +71,9 @@ assign ex_RegWrite = RegWrite;
 assign ex_MemtoReg = MemtoReg;
 assign ex_Mem_mode = Mem_mode;
 assign ex_Mem_read_us = Mem_read_us;
-assign ex_data2 = data2;
+assign ex_rdata2 = rdata2;
 assign ex_rd = rd;
 assign ex_result = result;
 assign ex_data = {ex_MemWrite, ex_MemRead, ex_RegWrite, ex_MemtoReg,
-                          ex_Mem_mode, ex_Mem_read_us, ex_data2, ex_rd, ex_result};
+                          ex_Mem_mode, ex_Mem_read_us, ex_rdata2, ex_rd, ex_result};
 endmodule

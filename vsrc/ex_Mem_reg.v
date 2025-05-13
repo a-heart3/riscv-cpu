@@ -51,13 +51,13 @@ wire RegWrite;
 wire [ 3:0] MemtoReg;
 wire [ 2:0] Mem_mode;
 wire        Mem_read_us;
-wire [31:0] data2;
+wire [31:0] rdata2;
 wire [ 4:0] rd;
 wire [31:0] result;
 wire [`EX_MEM_DATA -1:0] ex_mem_reg_data;
 
 assign {MemWrite, MemRead, RegWrite, MemtoReg,
-        Mem_mode, Mem_read_us, data2, rd,result} = ex_data; 
+        Mem_mode, Mem_read_us, rdata2, rd, result} = ex_data; 
 
 assign ex_mem_reg_data = {RegWrite, MemtoReg, rd, result};
 
@@ -94,7 +94,7 @@ assign mem_to_wb_reg_valid = ex_mem_reg_valid && ex_mem_reg_ready_go;
 assign data_sram_addr  = result;
 assign data_sram_en    = MemRead;
 assign data_sram_we    = MemWrite && ex_mem_reg_valid;
-assign data_sram_wdata = data2;
+assign data_sram_wdata = rdata2;
 assign data_sram_mode  = mem_read_mode;
 assign data_sram_us    = mem_read_us;
 assign data_sram_write_mode = Mem_mode;

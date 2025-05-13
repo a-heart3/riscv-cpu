@@ -58,6 +58,7 @@ wire [10:0] ds_OpControl;
 wire [31:0] ds_data1;
 wire [31:0] ds_data2;
 wire [ 4:0] ds_rd; 
+wire [31:0] ds_rdata2;
 
 // split 
 wire        instr30;
@@ -197,10 +198,11 @@ assign ds_OpControl = OpControl;
 assign ds_data1 = rdata1;
 assign ds_data2 = data2;
 assign ds_rd = rd;
+assign ds_rdata2 = rdata2;
 
 // output data;
 assign ds_data = {ds_MemWrite, ds_MemRead, ds_RegWrite, ds_MemtoReg, ds_Mem_mode,
-                  ds_Mem_read_us, ds_OpControl, ds_data1, ds_data2, ds_rd};
+                  ds_Mem_read_us, ds_OpControl, ds_data1, ds_data2, ds_rd, ds_rdata2};
 
 assign ds_branch_data = {ds_branch_addr, ds_branch_control};
 
