@@ -39,6 +39,7 @@ module ex_Mem_reg(
     output        data_sram_en,
     output        data_sram_we,
     output [ 2:0] data_sram_mode,
+    output [ 2:0] data_sram_write_mode,
     output        data_sram_us,
     input  [31:0] data_sram_rdata
 );
@@ -66,6 +67,8 @@ wire ex_mem_reg_ready_go;
 
 // ex_mem_reg definition
 reg [`EX_MEM_DATA -1:0] data;
+reg [2:0] mem_read_mode;
+reg       mem_read_us; 
 
 // reg tackle
 assign ex_mem_reg_ready_go = 1'b1;
@@ -74,10 +77,14 @@ always @(posedge clk) begin
     if (reset) begin
         ex_mem_reg_valid <= 1'b0;
         data <= 42'd0;
+        mem_read_mode <= 3'd0;
+        mem_read_us <= 1'b0;
     end
     else if (ex_mem_reg_allow_in && ex_to_mem_reg_valid) begin
         ex_mem_reg_valid <= ex_to_mem_reg_valid;
         data <= ex_mem_reg_data;
+        mem_read_mode <= Mem_mode;
+        mem_read_us <= Mem_read_us;
     end
 end
 
@@ -88,8 +95,9 @@ assign data_sram_addr  = result;
 assign data_sram_en    = MemRead;
 assign data_sram_we    = MemWrite && ex_mem_reg_valid;
 assign data_sram_wdata = data2;
-assign data_sram_mode  = Mem_mode;
-assign data_sram_us    = Mem_read_us;
+assign data_sram_mode  = mem_read_mode;
+assign data_sram_us    = mem_read_us;
+assign data_sram_write_mode = Mem_mode;
 
 // out data
 assign mem_data = {data, data_sram_rdata};

@@ -27,6 +27,7 @@ module data_ram(
     input         data_sram_en,
     input         data_sram_we,
     input  [ 2:0] data_sram_mode,
+    input  [ 2:0] data_sram_write_mode,
     input         data_sram_us,
     output [31:0] data_sram_rdata
 );
@@ -41,12 +42,12 @@ assign addr = data_sram_addr[31:2];
 wire [ 3:0] we;
 wire [31:0] wdata;
 mem_write mem_write(
-    .data_sram_wdata(data_sram_wdata ),
-    .data_sram_mode (data_sram_mode  ),
-    .data_sram_cs   (cs              ),
-    .data_sram_we   (data_sram_we    ),
-    .we             (we              ),
-    .wdata          (wdata           )
+    .data_sram_wdata(data_sram_wdata       ),
+    .data_sram_mode (data_sram_write_mode  ),
+    .data_sram_cs   (cs                    ),
+    .data_sram_we   (data_sram_we          ),
+    .we             (we                    ),
+    .wdata          (wdata                 )
 );
 
 // data ram

@@ -22,13 +22,7 @@
 
 module top(
     input                  clk,
-    input                  reset,
-    input   [ 4:0]         wb_rd,
-    input   [31:0]         wb_wdata,
-    input                  wb_we,
-    input                  mem_wb_reg_allow_in,
-    output                 mem_to_wb_reg_valid,
-    output  [`MEM_DATA -1:0] mem_data
+    input                  reset
 );
 
 // wire between fs and instr_ram
@@ -92,6 +86,7 @@ wire [ 4:0] wb_rd;
 wire        wb_we;
 // wire between ID and ds_ex_reg
 wire [`ID_DATA -1:0] ds_data;
+// connect with wb stage
 ID ID(
     .clk           (clk            ),
     .fs_ds_reg_data(fs_ds_reg_data ),
@@ -126,42 +121,77 @@ ex ex(
     .ex_data        (ex_data        )
 );
 
-// connect ex_mem_reg
+// connect data_instr
 wire [31:0] data_sram_addr;
 wire [31:0] data_sram_wdata;
 wire        data_sram_en;
 wire        data_sram_we;
 wire [ 2:0] data_sram_mode;
+wire [ 2:0] data_sram_write_mode;
 wire        data_sram_us;
 wire [31:0] data_sram_rdata;
 
+// connect with mem stage
+wire [`MEM_DATA -1:0] mem_data;
+
+// connect with mem_wb_reg
+wire mem_to_wb_reg_valid;
+wire mem_wb_reg_allow_in;
+
 ex_Mem_reg ex_Mem_reg(
-    .clk                (clk                 ),
-    .reset              (reset               ),
-    .ex_data            (ex_data             ),
-    .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
-    .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
-    .mem_wb_reg_allow_in(mem_wb_reg_allow_in ),
-    .mem_to_wb_reg_valid(mem_to_wb_reg_valid ),
-    .mem_data           (mem_data            ),
-    .data_sram_addr     (data_sram_addr      ),
-    .data_sram_wdata    (data_sram_wdata     ),
-    .data_sram_en       (data_sram_en        ),
-    .data_sram_we       (data_sram_we        ),
-    .data_sram_mode     (data_sram_mode      ),
-    .data_sram_us       (data_sram_us        ),
-    .data_sram_rdata    (data_sram_rdata     )
+    .clk                 (clk                  ),
+    .reset               (reset                ),
+    .ex_data             (ex_data              ),
+    .ex_to_mem_reg_valid (ex_to_mem_reg_valid  ),
+    .ex_mem_reg_allow_in (ex_mem_reg_allow_in  ),
+    .mem_wb_reg_allow_in (mem_wb_reg_allow_in  ),
+    .mem_to_wb_reg_valid (mem_to_wb_reg_valid  ),
+    .mem_data            (mem_data             ),
+    .data_sram_addr      (data_sram_addr       ),
+    .data_sram_wdata     (data_sram_wdata      ),
+    .data_sram_en        (data_sram_en         ),
+    .data_sram_we        (data_sram_we         ),
+    .data_sram_mode      (data_sram_mode       ),
+    .data_sram_write_mode(data_sram_write_mode ),
+    .data_sram_us        (data_sram_us         ),
+    .data_sram_rdata     (data_sram_rdata      )
 );
 
 data_ram data_ram(
-    .clk            (clk             ),
-    .data_sram_addr (data_sram_addr  ),
-    .data_sram_wdata(data_sram_wdata ),
-    .data_sram_en   (data_sram_en    ),
-    .data_sram_we   (data_sram_we    ),
-    .data_sram_mode (data_sram_mode  ),
-    .data_sram_us   (data_sram_us    ),
-    .data_sram_rdata(data_sram_rdata )
+    .clk                 (clk                  ),
+    .data_sram_addr      (data_sram_addr       ),
+    .data_sram_wdata     (data_sram_wdata      ),
+    .data_sram_en        (data_sram_en         ),
+    .data_sram_we        (data_sram_we         ),
+    .data_sram_mode      (data_sram_mode       ),
+    .data_sram_write_mode(data_sram_write_mode ),
+    .data_sram_us        (data_sram_us         ),
+    .data_sram_rdata     (data_sram_rdata      )
+);
+
+// connect with mem_wb_reg
+wire [`MEM_DATA -1:0] mem_stage_data;
+mem mem(
+    .mem_data      (mem_data       ),
+    .mem_stage_data(mem_stage_data )
+);
+
+// connect with wb stage
+wire [`WB_DATA -1:0] wb_data;
+mem_wb_reg mem_wb_reg(
+    .clk                (clk                 ),
+    .reset              (reset               ),
+    .mem_stage_data     (mem_stage_data      ),
+    .mem_to_wb_reg_valid(mem_to_wb_reg_valid ),
+    .mem_wb_reg_allow_in(mem_wb_reg_allow_in ),
+    .wb_data            (wb_data             )
+);
+
+wb wb(
+    .wb_data (wb_data  ),
+    .wb_wdata(wb_wdata ),
+    .wb_rd   (wb_rd    ),
+    .wb_we   (wb_we    )
 );
 
 endmodule

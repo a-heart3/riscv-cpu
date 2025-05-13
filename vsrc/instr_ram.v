@@ -53,7 +53,7 @@ instr_ram0 instr_ram0(
     .clka (clk             ),
     .ena  (instr_sram_en   ),
     .wea  (instr_sram_we   ),
-    .addra(instr_sram_addr ),
+    .addra(instr_addr      ),
     .dina (wdata0          ),
     .douta(instr0          )
 );
@@ -62,7 +62,7 @@ instr_ram1 instr_ram1(
     .clka (clk             ),
     .ena  (instr_sram_en   ),
     .wea  (instr_sram_we   ),
-    .addra(instr_sram_addr ),
+    .addra(instr_addr      ),
     .dina (wdata1          ),
     .douta(instr1          )
 );
@@ -71,7 +71,7 @@ instr_ram2 instr_ram2(
     .clka (clk             ),
     .ena  (instr_sram_en   ),
     .wea  (instr_sram_we   ),
-    .addra(instr_sram_addr ),
+    .addra(instr_addr      ),
     .dina (wdata2          ),
     .douta(instr2          )
 );
@@ -80,7 +80,7 @@ instr_ram3 instr_ram3(
     .clka (clk             ),
     .ena  (instr_sram_en   ),
     .wea  (instr_sram_we   ),
-    .addra(instr_sram_addr ),
+    .addra(instr_addr      ),
     .dina (wdata3          ),
     .douta(instr3          )
 );

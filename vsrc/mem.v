@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 05/06/2025 07:35:46 PM
+// Create Date: 05/13/2025 02:30:50 PM
 // Design Name: 
-// Module Name: top_tb
+// Module Name: mem
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -18,28 +18,18 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+`include "pipeline.vh"
 
-
-module top_tb();
-reg         clk;
-reg         reset;
-
-top top(
-    .clk                (clk                 ),
-    .reset              (reset               )
+module mem(
+    input  [`MEM_DATA -1:0] mem_data,
+    output [`MEM_DATA -1:0] mem_stage_data
 );
 
-initial begin
-    clk <= 1'b0;
-    reset <= 1'b1;
-    #10;
-    reset <= 1'b0;
-    #10;
-end
+/*
+do nothing
+everything has done by reg
+*/
 
-always begin
-    #5;
-    clk <= ~clk;
-end
+assign mem_stage_data = mem_data;
 
 endmodule
