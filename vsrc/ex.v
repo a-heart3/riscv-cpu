@@ -22,7 +22,10 @@
 
 module ex(
     input  [`ID_DATA -1:0] ds_ex_reg_data,
-    output [`EX_DATA -1:0] ex_data
+    output [`EX_DATA -1:0] ex_data,
+    output [ 4:0] ex_rd,
+    output [31:0] ex_fd_data,
+    output        ex_memread
 );
 
 // ex input data
@@ -49,7 +52,6 @@ wire ex_RegWrite;
 wire [ 3:0] ex_MemtoReg;
 wire [ 2:0] ex_Mem_mode;
 wire        ex_Mem_read_us;
-wire [31:0] ex_data2;
 wire [ 4:0] ex_rd;
 wire [31:0] ex_result;
 wire [31:0] ex_rdata2;
@@ -76,4 +78,7 @@ assign ex_rd = rd;
 assign ex_result = result;
 assign ex_data = {ex_MemWrite, ex_MemRead, ex_RegWrite, ex_MemtoReg,
                           ex_Mem_mode, ex_Mem_read_us, ex_rdata2, ex_rd, ex_result};
+
+assign ex_fd_data = result;
+assign ex_memread = MemRead;
 endmodule

@@ -31,7 +31,14 @@ module ID(
     // branch data to pc
     output [`BRANCH_DATA -1:0] ds_branch_data,
     // branch data to id_ex_reg
-    output [`ID_DATA -1:0] ds_data
+    output [`ID_DATA -1:0] ds_data,
+    // data risk access
+    input  [ 4:0] ex_rd,
+    input  [ 4:0] mem_rd,
+    input         ex_memread,
+    input  [31:0] ex_data,
+    input  [31:0] mem_data,
+    output        load_use
 );
 
 // ID input data
@@ -161,8 +168,55 @@ regfile rf(
     .raddr2(rs2      ),
     .waddr (wb_rd    ),
     .wdata (wb_wdata ),
-    .rdata1(rdata1    ),
-    .rdata2(rdata2    )
+    .rdata1(rdata1   ),
+    .rdata2(rdata2   )
+);
+
+// select forward_mode
+wire [3:0] fd_mode_rs1;
+wire [3:0] fd_mode_rs2;
+wire load_use_rs1;
+wire load_use_rs2;
+
+wire [31:0] reg_data1;
+wire [31:0] reg_data2;
+
+forward_judge forward_judge_rs1(
+    .rs        (rs1          ),
+    .ex_rd     (ex_rd        ),
+    .mem_rd    (mem_rd       ),
+    .wb_rd     (wb_rd        ),
+    .ex_memread(ex_memread   ),
+    .fd_mode   (fd_mode_rs1  ),
+    .load_use  (load_use_rs1 )
+);
+
+forward_judge forward_judge_rs2(
+    .rs        (rs2          ),
+    .ex_rd     (ex_rd        ),
+    .mem_rd    (mem_rd       ),
+    .wb_rd     (wb_rd        ),
+    .ex_memread(ex_memread   ),
+    .fd_mode   (fd_mode_rs2  ),
+    .load_use  (load_use_rs2 )
+);
+
+tmux4_1 tmux4_1_regdata1(
+    .src1  (ex_data     ),
+    .src2  (mem_data    ),
+    .src3  (wb_wdata    ),
+    .src4  (rdata1      ),
+    .sel   (fd_mode_rs1 ),
+    .result(reg_data1   )
+);
+
+tmux4_1 tmux4_1_regdata2(
+    .src1  (ex_data     ),
+    .src2  (mem_data    ),
+    .src3  (wb_wdata    ),
+    .src4  (rdata2      ),
+    .sel   (fd_mode_rs2 ),
+    .result(reg_data2   )
 );
 
 // select src2
@@ -177,7 +231,7 @@ assign imme_stype = {{20{instr[31]}}, instr[31:25], instr[11:7]};
 assign imme_lui   = {{12{instr[31]}}, instr[31:12]};
 
 tmux4_1 #(32) Srcselect(
-    .src1  (rdata2     ),
+    .src1  (reg_data2   ),
     .src2  (imme_itype ),
     .src3  (imme_stype ),
     .src4  (imme_lui   ),
@@ -195,7 +249,7 @@ assign ds_Mem_read_us = Mem_read_us;
 assign ds_branch_addr = branch_addr;
 assign ds_branch_control = branch_control;
 assign ds_OpControl = OpControl;
-assign ds_data1 = rdata1;
+assign ds_data1 = reg_data1;
 assign ds_data2 = data2;
 assign ds_rd = rd;
 assign ds_rdata2 = rdata2;
@@ -206,8 +260,6 @@ assign ds_data = {ds_MemWrite, ds_MemRead, ds_RegWrite, ds_MemtoReg, ds_Mem_mode
 
 assign ds_branch_data = {ds_branch_addr, ds_branch_control};
 
-
-
-// connect controller
+assign load_use = load_use_rs1 | load_use_rs2;
 
 endmodule

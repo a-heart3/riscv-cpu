@@ -86,7 +86,13 @@ wire [ 4:0] wb_rd;
 wire        wb_we;
 // wire between ID and ds_ex_reg
 wire [`ID_DATA -1:0] ds_data;
-// connect with wb stage
+// wire use to data risk
+wire [4:0] ex_rd;
+wire [4:0] mem_rd;
+wire       ex_memread;
+wire [31:0] ex_fd_data;
+wire [31:0] mem_fd_data;
+wire        load_use;
 ID ID(
     .clk           (clk            ),
     .fs_ds_reg_data(fs_ds_reg_data ),
@@ -94,7 +100,13 @@ ID ID(
     .wb_rd         (wb_rd          ),
     .wb_we         (wb_we          ),
     .ds_branch_data(ds_branch_data ),
-    .ds_data       (ds_data        )
+    .ds_data       (ds_data        ),
+    .ex_rd         (ex_rd          ),
+    .mem_rd        (mem_rd         ),
+    .ex_memread    (ex_memread     ),
+    .ex_data       (ex_fd_data     ),
+    .mem_data      (mem_fd_data    ),
+    .load_use      (load_use       )
 );
 
 // connect with ds_ex_reg
@@ -118,7 +130,10 @@ ds_ex_reg ds_ex_reg(
 wire [`EX_DATA -1:0] ex_data;
 ex ex(
     .ds_ex_reg_data (ds_ex_reg_data ),
-    .ex_data        (ex_data        )
+    .ex_data        (ex_data        ),
+    .ex_rd          (ex_rd          ),
+    .ex_fd_data     (ex_fd_data     ),
+    .ex_memread     (ex_memread     )
 );
 
 // connect data_instr
@@ -173,7 +188,9 @@ data_ram data_ram(
 wire [`MEM_DATA -1:0] mem_stage_data;
 mem mem(
     .mem_data      (mem_data       ),
-    .mem_stage_data(mem_stage_data )
+    .mem_stage_data(mem_stage_data ),
+    .mem_rd        (mem_rd         ),
+    .mem_fd_data   (mem_fd_data    )
 );
 
 // connect with wb stage
