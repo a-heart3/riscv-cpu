@@ -31,6 +31,7 @@ module fs_ds_reg(
     input  ds_ex_reg_allow_in,
     output ds_to_ex_reg_valid,
     // data to next ID combination logic
+ //   input                  is_branch,
     input                  load_use,
     output [`FS_DATA -1:0] fs_ds_reg_data  
 );

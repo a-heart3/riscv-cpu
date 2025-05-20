@@ -69,6 +69,7 @@ wire [`FS_DATA -1:0] fs_ds_reg_data;
 wire ds_ex_reg_allow_in;
 wire ds_to_ex_reg_valid;
 wire load_use;
+//wire is_branch;
 fs_ds_reg fs_ds_reg(
     .clk               (clk                ),
     .reset             (reset              ),
@@ -78,6 +79,7 @@ fs_ds_reg fs_ds_reg(
     .ds_ex_reg_allow_in(ds_ex_reg_allow_in ),
     .ds_to_ex_reg_valid(ds_to_ex_reg_valid ),
     .fs_ds_reg_data    (fs_ds_reg_data     ),
+//    .is_branch         (is_branch          ),
     .load_use          (load_use           )
 );
 
@@ -107,6 +109,7 @@ ID ID(
     .ex_memread    (ex_memread     ),
     .ex_data       (ex_fd_data     ),
     .mem_data      (mem_fd_data    ),
+ //   .is_branch     (is_branch      ),
     .load_use      (load_use       )
 );
 

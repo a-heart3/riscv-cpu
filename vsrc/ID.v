@@ -38,6 +38,7 @@ module ID(
     input         ex_memread,
     input  [31:0] ex_data,
     input  [31:0] mem_data,
+//    output        is_branch,
     output        load_use
 );
 
@@ -260,5 +261,7 @@ assign ds_data = {ds_MemWrite, ds_MemRead, ds_RegWrite, ds_MemtoReg, ds_Mem_mode
 assign ds_branch_data = {ds_branch_addr, ds_branch_control};
 
 assign load_use = load_use_rs1 | load_use_rs2;
+
+//assign is_branch = branch_control;
 
 endmodule
