@@ -125,11 +125,13 @@ wire [31:0] rdata1;
 wire [31:0] rdata2;
 wire [ 3:0] branch_type;
 wire        branch_control;
+wire [31:0] reg_data1;
+wire [31:0] reg_data2;
 
 Branch_control Branch_control(
     .BranchControl (BranchControl ),
-    .data1         (rdata1         ),
-    .data2         (rdata2         ),
+    .data1         (reg_data1     ),
+    .data2         (reg_data2     ),
     .func3         (func3         ),
     .branch_type   (branch_type   ),
     .branch_control(branch_control)
@@ -177,9 +179,6 @@ wire [3:0] fd_mode_rs1;
 wire [3:0] fd_mode_rs2;
 wire load_use_rs1;
 wire load_use_rs2;
-
-wire [31:0] reg_data1;
-wire [31:0] reg_data2;
 
 forward_judge forward_judge_rs1(
     .rs        (rs1          ),

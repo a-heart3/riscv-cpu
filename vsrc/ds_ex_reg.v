@@ -24,6 +24,7 @@ module ds_ex_reg(
     input clk,
     input reset,
     // id and ds_ex_reg connect
+    input                 load_use,
     input [`ID_DATA -1:0] ds_data,
     // fs_ds_reg and ds_ex_reg connect
     input ds_to_ex_reg_valid,
@@ -46,9 +47,9 @@ reg [`ID_DATA -1:0] data;
 assign ds_ex_reg_ready_go = 1'b1;
 assign ds_ex_reg_allow_in = !ds_ex_reg_valid || ds_ex_reg_ready_go && ex_mem_reg_allow_in;
 always @(posedge clk) begin
-    if (reset) begin
+    if (reset | load_use) begin
         ds_ex_reg_valid <= 1'b0;
-        data <= 91'd0;
+        data <= 122'd0;
     end
     else if(ds_ex_reg_allow_in && ds_to_ex_reg_valid) begin
         ds_ex_reg_valid <= ds_to_ex_reg_valid;

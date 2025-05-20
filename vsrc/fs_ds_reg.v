@@ -31,6 +31,7 @@ module fs_ds_reg(
     input  ds_ex_reg_allow_in,
     output ds_to_ex_reg_valid,
     // data to next ID combination logic
+    input                  load_use,
     output [`FS_DATA -1:0] fs_ds_reg_data  
 );
 
@@ -42,7 +43,7 @@ wire fs_ds_reg_ready_go;
 reg [`FS_DATA -1:0] data;
 
 // reg tackle
-assign fs_ds_reg_ready_go = 1'b1;
+assign fs_ds_reg_ready_go = !load_use;
 assign fs_ds_reg_allow_in = !fs_ds_reg_valid || fs_ds_reg_ready_go && ds_ex_reg_allow_in;
 always @(posedge clk) begin
     if (reset) begin

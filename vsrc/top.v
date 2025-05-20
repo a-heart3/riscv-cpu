@@ -68,6 +68,7 @@ instr_ram instr_ram(
 wire [`FS_DATA -1:0] fs_ds_reg_data;
 wire ds_ex_reg_allow_in;
 wire ds_to_ex_reg_valid;
+wire load_use;
 fs_ds_reg fs_ds_reg(
     .clk               (clk                ),
     .reset             (reset              ),
@@ -76,7 +77,8 @@ fs_ds_reg fs_ds_reg(
     .fs_ds_reg_allow_in(fs_ds_reg_allow_in ),
     .ds_ex_reg_allow_in(ds_ex_reg_allow_in ),
     .ds_to_ex_reg_valid(ds_to_ex_reg_valid ),
-    .fs_ds_reg_data    (fs_ds_reg_data     )
+    .fs_ds_reg_data    (fs_ds_reg_data     ),
+    .load_use          (load_use           )
 );
 
 // connect with ID
@@ -92,7 +94,6 @@ wire [4:0] mem_rd;
 wire       ex_memread;
 wire [31:0] ex_fd_data;
 wire [31:0] mem_fd_data;
-wire        load_use;
 ID ID(
     .clk           (clk            ),
     .fs_ds_reg_data(fs_ds_reg_data ),
@@ -122,7 +123,8 @@ ds_ex_reg ds_ex_reg(
     .ds_ex_reg_allow_in (ds_ex_reg_allow_in  ),
     .ex_mem_reg_allow_in(ex_mem_reg_allow_in ),
     .ex_to_mem_reg_valid(ex_to_mem_reg_valid ),
-    .ds_ex_reg_data     (ds_ex_reg_data      )
+    .ds_ex_reg_data     (ds_ex_reg_data      ),
+    .load_use           (load_use            )
 );
 
 // connect EX
