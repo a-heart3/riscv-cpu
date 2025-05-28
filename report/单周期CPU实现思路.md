@@ -6,11 +6,9 @@
 
 指令集: `RISCV`
 
-参考资料: `<<CPU设计实战`,`<< 计算机组成与设计: 软硬件接口>>`
 
 
-
-## 实验过程
+## 基本部件
 
 ### 多路选择器
 
@@ -296,4 +294,95 @@ memory_out模块: 负责处理输出数据
    );
    ```
 
-   
+
+
+
+## 实现步骤
+
+### IF
+
+![diyibu.drawio](/home/ax/Desktop/riscv-cpu/report/src/diyibu.drawio.png)
+
+IF阶段主要是根据pc的值来取出指令ram中的指令。
+
+
+
+### ID
+
+![id.drawio](./src/id.drawio.png)
+
+ID可以说是重中之重，这里我们分成三部分来看
+
+#### 控制器部分
+
+1. controller
+
+   这里根据`opcode`信号可以判断指令的类型，进而产生相应的控制信号，控制信号功能如下表所示
+
+   | 信号            | 作用                               |
+   | --------------- | ---------------------------------- |
+   | `BranchControl` | 用来使分支控制器产生相应的控制信号 |
+   | `AluControl`    | 用来使`Alu`控制器产生操作信号      |
+   | `RegWrite`      | 控制寄存器读                       |
+   | `ALUSrc`        | 控制选择`ALU`的原操作数2           |
+   | `MemWrite`      | 控制数据存储器写                   |
+   | `MemtoReg`      | 选择写回内存的值                   |
+
+   这里对`ALUSrc`信号和`MemtoReg`信号进行解释：
+
+   `ALUSrc`:因为`RISCV`指令中，有`Rtype`，`Itype`，`Stype`以及`lui`指令，这些指令在本设计中复用一个`ALU`,而这四个指令的第二个原操作数的获取方式是不同的。`Rtype`从寄存器堆获取，`Itype`,`Stype`,`lui`则是将指令中部分立即数经过位扩展后得到，故需要该信号来选择`ALU`的原操作数2.
+
+   `MemtoReg`:需要将数据写回到寄存器堆的指令有`Rtype`,`jal`,`jalr`,`Stype`,`auipc`，写回的数据如下
+
+   | 类型         | 写回数据         |
+   | ------------ | ---------------- |
+   | `Rtype`      | `ALU`的计算结果  |
+   | `jal`,`jalr` | `pc+4`           |
+   | `Stype`      | 从内存提取的结果 |
+   | `auipc`      | 分支地址         |
+
+   故需要多路选择器选择写会哪个数据
+
+2. Alu_controller
+
+   根据`AluControl`,`func3`,指令的次高位来确定`Opcontrol`信号（控制`Alu`执行)
+
+3. Branch_control
+
+   根据`BranchControl`,`func3`,从寄存器读出的数据来判断分支地址应该是哪种，生成`branch_type`信号来控制下一条指令地址。
+
+
+
+#### 寄存器堆部分
+
+根据`rs1`,`rs2`读出数据，并利用多路选择器选择原操作数2,`rd`为写寄存器地址.
+
+
+
+#### 分支计算部分
+
+计算出分支和顺序执行的地址，并利用多路选择器选择下一条指令地址。
+
+
+
+### EX
+
+![ex.drawio](./src/ex.drawio.png)
+
+这一部分其实就是将`rdata1`和原操作数2输入`ALU`，然后根据`OpControl`信号产生`Alu`的计算结果。
+
+
+
+### MEM
+
+![mem.drawio](./src/MEM.drawio.png)
+
+`MEM`即访存，`RISCV`只有两种指令可以访存，即`load`指令和`store`指令,在基础部件部分我们已经提到，将`data ram`进行了位扩展,所以需要`func3`信号充当类型，指导内存读入/取出的数据是32位/16位/8位的。这里若是`store`指令，即有数据写入，写入的为从寄存器中读取的`rdata2`,`ALU`的计算结果可以作为读地址，也可以作为写地址，是否读写由`MemWrite`信号指示。
+
+
+
+##### WB
+
+![wb.drawio](/home/ax/Desktop/riscv-cpu/report/src/wb.drawio.png)
+
+`wb`即写会，只需要在4选1选择器中选择一个数作为寄存器堆的写入数据即可。三
